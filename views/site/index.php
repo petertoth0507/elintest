@@ -15,6 +15,9 @@ $this->title = 'My Yii Application';
     </div>
 
     <div class="body-content">
+        <div class="row">
+            <?php echo $result ?>
+        </div>
 
         <div class="row">
             <div class="col-lg-4 mb-3">
