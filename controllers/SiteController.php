@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\common\components\Utilities;
 use app\common\LogFileProcessor;
 use Yii;
 use yii\filters\AccessControl;
@@ -62,13 +63,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $logFileProcessor = new LogFileProcessor;
-        $result = $logFileProcessor->readLogFile();
-        return $this->render('index', [
-            'result' => $result
-        ]);
+        return $this->render('index',);
     }
 
+    public function actionLoadJstree()
+    {
+        $logFileProcessor = new LogFileProcessor;
+
+        $result = $logFileProcessor->readLogFile();
+
+        Utilities::outputResult($result);
+    }
     /**
      * Login action.
      *

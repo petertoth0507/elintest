@@ -13,7 +13,7 @@ class LogFileProcessor
 {
 
     const LOG_FILE_RELATIVE_PATH = DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'teszt.log';
-    const LINE_LIMIT = 100000000;
+    const LINE_LIMIT = 1000;
     const BASE_WEB_PATH = '/home/www/clients/client1286/web15061/web/';
 
     public $jstreeTypeArray = [];
@@ -30,26 +30,29 @@ class LogFileProcessor
         Yii::error($logFilePath);
 
         $logFile = new SplFileObject($logFilePath);
-        $rowCounterString = '';
         $rowCounter = 1;
         while (!$logFile->eof()) {
             set_time_limit(60);
             $fileRow = $logFile->fgets();
             if (strpos($fileRow, ' -> ')) {
                 $processedData = $this->processFileRow($fileRow);
-                $processedData += ['id' => $rowCounter];
+                $processedData +=  ['id' => (string) $rowCounter];
                 if (empty($this->prevItem)) {
+                    $processedData += ['parent' => (string) end($this->parents)['parent']];
                     $this->prevItem = $processedData;
                 }
                 $this->setParentId($processedData);
                 if (end($this->parents)['levelPos'] === $processedData['levelPos']) {
-                    $processedData += ['parent' => end($this->parents)['parent']];
+                    $processedData += ['parent' => (string) end($this->parents)['parent']];
                 } else {
-                    $processedData += ['parent' => end($this->parents)['id']];
+                    $processedData += ['parent' => (string) end($this->parents)['id']];
                 }
 
+                $processedData += ['relativeMem' => $processedData['usedMemory'] - $this->prevItem['usedMemory']];
+                $processedData += ['text' => $processedData['logRow']];
                 Yii::error(json_encode(end($this->parents)));
                 Yii::error(json_encode($processedData));
+                $this->jstreeTypeArray[] = $this->prevItem;
                 $this->prevItem = $processedData;
             }
             $rowCounter++;
@@ -57,7 +60,7 @@ class LogFileProcessor
                 break;
             }
         }
-        return $rowCounterString;
+        return $this->jstreeTypeArray;
     }
 
 
