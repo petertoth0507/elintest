@@ -70,69 +70,25 @@ class SiteController extends Controller
     {
         $logFileProcessor = new LogFileProcessor;
 
-        $result = $logFileProcessor->readLogFile();
+        $result = json_encode($logFileProcessor->readLogFile());
+
+        /*   $result =
+            '[
+            "Simple root node",
+            {
+              "text" : "Root node 2",
+              "state" : {
+                "opened" : true,
+                "selected" : true
+              },
+              "children" : [
+                { "text" : "Child 1" },
+                "Child 2"
+              ]
+           }
+         ]';*/
+
 
         Utilities::outputResult($result);
-    }
-    /**
-     * Login action.
-     *
-     * @return Response|string
-     */
-    public function actionLogin()
-    {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
-
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
-
-        $model->password = '';
-        return $this->render('login', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
-
-        return $this->goHome();
-    }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
     }
 }

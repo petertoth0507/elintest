@@ -13,7 +13,7 @@ class LogFileProcessor
 {
 
     const LOG_FILE_RELATIVE_PATH = DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'teszt.log';
-    const LINE_LIMIT = 1000;
+    const LINE_LIMIT = 100000;
     const BASE_WEB_PATH = '/home/www/clients/client1286/web15061/web/';
 
     public $jstreeTypeArray = [];
@@ -21,7 +21,7 @@ class LogFileProcessor
     public $prevItem = [];
     public $currentItem = [];
 
-    public $parents = [['id' => '#', 'levelPos' => 0, 'parent' => '#']];
+    public $parents = [['id' => '0', 'levelPos' => 0, 'parent' => '#', 'text' => 'log file started']];
 
     public function readLogFile()
     {
@@ -31,6 +31,7 @@ class LogFileProcessor
 
         $logFile = new SplFileObject($logFilePath);
         $rowCounter = 1;
+        $isFirstProcessedRow = true;
         while (!$logFile->eof()) {
             set_time_limit(60);
             $fileRow = $logFile->fgets();
@@ -39,6 +40,7 @@ class LogFileProcessor
                 $processedData +=  ['id' => (string) $rowCounter];
                 if (empty($this->prevItem)) {
                     $processedData += ['parent' => (string) end($this->parents)['parent']];
+                    $processedData += ['relativeMem' => $processedData['usedMemory']];
                     $this->prevItem = $processedData;
                 }
                 $this->setParentId($processedData);
@@ -49,11 +51,13 @@ class LogFileProcessor
                 }
 
                 $processedData += ['relativeMem' => $processedData['usedMemory'] - $this->prevItem['usedMemory']];
-                $processedData += ['text' => $processedData['logRow']];
                 Yii::error(json_encode(end($this->parents)));
                 Yii::error(json_encode($processedData));
-                $this->jstreeTypeArray[] = $this->prevItem;
+                if (!$isFirstProcessedRow) {
+                    $this->jstreeTypeArray[] = $this->prevItem;
+                }
                 $this->prevItem = $processedData;
+                $isFirstProcessedRow = false;
             }
             $rowCounter++;
             if ($rowCounter > static::LINE_LIMIT) {
@@ -81,7 +85,8 @@ class LogFileProcessor
             'startTime' => (float) $startTime,
             'usedMemory' => (int) $usedMemory,
             'processedRow' => $processedRow,
-            'logRow' => $logRow
+            'logRow' => $logRow,
+            'text' => $processedRow
         ];
     }
 
