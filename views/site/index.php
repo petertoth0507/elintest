@@ -1,8 +1,16 @@
 <?php
 
+use app\assets\JstTreeAsset;
+use app\common\components\Utilities;
+use yii\helpers\Url;
+
 /** @var yii\web\View $this */
 
 $this->title = 'My Yii Application';
+JstTreeAsset::register($this);
+Utilities::registerJS($this, [
+    'load_jstree_url' => Url::toRoute('site/load-jstree'),
+]);
 ?>
 <div class="site-index">
 
@@ -11,12 +19,12 @@ $this->title = 'My Yii Application';
 
         <p class="lead">You have successfully created your Yii-powered application.</p>
 
-        <p><a class="btn btn-lg btn-success" href="https://www.yiiframework.com">Get started with Yii</a></p>
+        <div id="btn-jstree" class="btn btn-lg btn-success">Get started with Yii</div>
     </div>
 
     <div class="body-content">
         <div class="row">
-            <?php echo $result ?>
+            <div id="jstree-div"></div>
         </div>
 
         <div class="row">
@@ -52,5 +60,20 @@ $this->title = 'My Yii Application';
             </div>
         </div>
 
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modalLoader" tabindex="-1" role="dialog" aria-labelledby="modalLoaderTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header mx-auto">
+                    <h5 class="modal-title" id="modalLoaderTitle"><?php echo Yii::t('app', 'LoadingProcess'); ?></h5>
+                </div>
+                <hr>
+                <div class="modal-body mx-auto">
+                    <div class="loader"></div>
+                    <div class="pt-5 text-center"><?php echo Yii::t('app', 'PleaseWait'); ?></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
