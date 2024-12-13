@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\common\components\Utilities;
+use app\common\LogFileProcessor;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
@@ -61,68 +63,32 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        return $this->render('index',);
     }
 
-    /**
-     * Login action.
-     *
-     * @return Response|string
-     */
-    public function actionLogin()
+    public function actionLoadJstree()
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
-        }
+        $logFileProcessor = new LogFileProcessor;
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
+        $result = json_encode($logFileProcessor->readLogFile());
 
-        $model->password = '';
-        return $this->render('login', [
-            'model' => $model,
-        ]);
-    }
+        /*   $result =
+            '[
+            "Simple root node",
+            {
+              "text" : "Root node 2",
+              "state" : {
+                "opened" : true,
+                "selected" : true
+              },
+              "children" : [
+                { "text" : "Child 1" },
+                "Child 2"
+              ]
+           }
+         ]';*/
 
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
-    public function actionLogout()
-    {
-        Yii::$app->user->logout();
 
-        return $this->goHome();
-    }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
+        Utilities::outputResult($result);
     }
 }
