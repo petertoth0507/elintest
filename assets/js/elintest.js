@@ -18,7 +18,6 @@ function createJstreeData () {
     success: function (result) {
       try {
         let parsedData = JSON.parse(result) // Check if it's a valid JSON
-        console.log('Parsed JSON:', parsedData)
         loadJstreeData(parsedData)
       } catch (e) {
         console.error('Invalid JSON:', e)

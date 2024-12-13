@@ -13,7 +13,7 @@ class LogFileProcessor
 {
 
     const LOG_FILE_RELATIVE_PATH = DIRECTORY_SEPARATOR . 'web' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'teszt.log';
-    const LINE_LIMIT = 100000;
+    const LINE_LIMIT = 10000000;
     const BASE_WEB_PATH = '/home/www/clients/client1286/web15061/web/';
 
     public $jstreeTypeArray = [];
@@ -41,6 +41,9 @@ class LogFileProcessor
                 if (empty($this->prevItem)) {
                     $processedData += ['parent' => (string) end($this->parents)['parent']];
                     $processedData += ['relativeMem' => $processedData['usedMemory']];
+                    $processedData += ['duringTime' => $processedData['startTime']];
+                    $processedData += ['text' => number_format(($processedData['usedMemory'] / 1024), 2, '.', '') . 'Kb,  0s ---- '  . $processedData['processedRow'] . ':' . $processedData['logRow']];
+
                     $this->prevItem = $processedData;
                 }
                 $this->setParentId($processedData);
@@ -51,8 +54,9 @@ class LogFileProcessor
                 }
 
                 $processedData += ['relativeMem' => $processedData['usedMemory'] - $this->prevItem['usedMemory']];
-                Yii::error(json_encode(end($this->parents)));
-                Yii::error(json_encode($processedData));
+                $this->prevItem['duringTime'] = (float) $processedData['startTime'] - (float) $this->prevItem['startTime'];
+                $this->prevItem['text'] = number_format(($this->prevItem['usedMemory'] / 1024), 2, '.', '') . 'Kb,  ' .  number_format($this->prevItem['duringTime'], 2, '.', '') . 's ---- ' . $this->prevItem['processedRow'] . ':' . $this->prevItem['logRow'];
+
                 if (!$isFirstProcessedRow) {
                     $this->jstreeTypeArray[] = $this->prevItem;
                 }
@@ -86,7 +90,6 @@ class LogFileProcessor
             'usedMemory' => (int) $usedMemory,
             'processedRow' => $processedRow,
             'logRow' => $logRow,
-            'text' => $processedRow
         ];
     }
 
